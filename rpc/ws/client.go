@@ -138,6 +138,7 @@ func (c *Client) receiveMessages() {
 			return
 		default:
 			_, message, err := c.conn.ReadMessage()
+			c.conn.SetReadDeadline(time.Now().Add(pongWait))
 			if err != nil {
 				c.closeAllSubscription(err)
 				return
