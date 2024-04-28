@@ -92,6 +92,10 @@ type ParsedBlockSubscription struct {
 	sub *Subscription
 }
 
+func (sw *ParsedBlockSubscription) Key() string {
+	return sw.sub.Key()
+}
+
 func (sw *ParsedBlockSubscription) Recv() (*ParsedBlockResult, error) {
 	select {
 	case d := <-sw.sub.stream:

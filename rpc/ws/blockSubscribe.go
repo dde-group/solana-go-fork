@@ -148,6 +148,10 @@ type BlockSubscription struct {
 	sub *Subscription
 }
 
+func (sw *BlockSubscription) Key() string {
+	return sw.sub.Key()
+}
+
 func (sw *BlockSubscription) Recv() (*BlockResult, error) {
 	select {
 	case d := <-sw.sub.stream:

@@ -86,6 +86,10 @@ type ProgramSubscription struct {
 	sub *Subscription
 }
 
+func (sw *ProgramSubscription) Key() string {
+	return sw.sub.Key()
+}
+
 func (sw *ProgramSubscription) Recv() (*ProgramResult, error) {
 	select {
 	case d := <-sw.sub.stream:

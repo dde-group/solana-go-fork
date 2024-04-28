@@ -46,6 +46,12 @@ func newSubscription(
 	}
 }
 
+func (s *Subscription) Key() string {
+	method := s.req.Method
+	param, _ := json.Marshal(s.req.Params)
+	return method + "@" + string(param)
+}
+
 func (s *Subscription) Recv() (interface{}, error) {
 	select {
 	case d := <-s.stream:

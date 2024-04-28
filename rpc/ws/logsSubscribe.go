@@ -107,6 +107,10 @@ type LogSubscription struct {
 	sub *Subscription
 }
 
+func (sw *LogSubscription) Key() string {
+	return sw.sub.Key()
+}
+
 func (sw *LogSubscription) Recv() (*LogResult, error) {
 	select {
 	case d := <-sw.sub.stream:

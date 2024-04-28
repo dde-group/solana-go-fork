@@ -45,6 +45,10 @@ type SlotSubscription struct {
 	sub *Subscription
 }
 
+func (sw *SlotSubscription) Key() string {
+	return sw.sub.Key()
+}
+
 func (sw *SlotSubscription) Recv() (*SlotResult, error) {
 	select {
 	case d := <-sw.sub.stream:

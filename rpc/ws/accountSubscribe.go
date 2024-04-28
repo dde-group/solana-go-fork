@@ -83,6 +83,10 @@ type AccountSubscription struct {
 	sub *Subscription
 }
 
+func (sw *AccountSubscription) Key() string {
+	return sw.sub.Key()
+}
+
 func (sw *AccountSubscription) Recv() (*AccountResult, error) {
 	select {
 	case d := <-sw.sub.stream:
