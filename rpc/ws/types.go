@@ -25,6 +25,9 @@ import (
 	"time"
 )
 
+type ISubscription interface {
+	Key() string
+}
 type request struct {
 	Version string      `json:"jsonrpc"`
 	Method  string      `json:"method"`
