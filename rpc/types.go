@@ -111,14 +111,14 @@ type TransactionWithMeta struct {
 	Version TransactionVersion `json:"version"`
 }
 
-func (dt TransactionWithMeta) GetParsedTransaction() (*solana.Transaction, error) {
+func (dt TransactionWithMeta) GetParsedTransaction() (*ParsedTransaction, error) {
 	if dt.Transaction == nil {
 		return nil, fmt.Errorf("transaction is nil")
 	}
 	if dt.Transaction.rawDataEncoding != solana.EncodingJSONParsed {
 		return nil, fmt.Errorf("data is not in JSONParsed encoding")
 	}
-	var parsedTransaction solana.Transaction
+	var parsedTransaction ParsedTransaction
 	if err := json.Unmarshal(dt.Transaction.asJSON, &parsedTransaction); err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ type TransactionMeta struct {
 	Rewards []BlockReward `json:"rewards"`
 
 	LoadedAddresses LoadedAddresses `json:"loadedAddresses"`
-	
+
 	ComputeUnitsConsumed *uint64 `json:"computeUnitsConsumed"`
 }
 
