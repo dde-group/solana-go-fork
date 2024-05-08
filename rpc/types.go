@@ -444,6 +444,11 @@ const (
 	CommitmentProcessed CommitmentType = "processed"
 )
 
+type ParsedTransactionAccounts struct {
+	Signatures  []solana.Signature     `json:"signatures"`
+	AccountKeys []ParsedMessageAccount `json:"accountKeys"`
+}
+
 type ParsedTransaction struct {
 	Signatures []solana.Signature `json:"signatures"`
 	Message    ParsedMessage      `json:"message"`
