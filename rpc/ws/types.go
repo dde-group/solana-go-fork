@@ -69,6 +69,8 @@ type params struct {
 type Options struct {
 	HttpHeader       http.Header
 	HandshakeTimeout time.Duration
+	ReadBufferSize   int
+	WriteBufferSize  int
 }
 
 var DefaultHandshakeTimeout = 45 * time.Second

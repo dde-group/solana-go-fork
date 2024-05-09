@@ -92,7 +92,15 @@ func ConnectWithOptions(ctx context.Context, rpcEndpoint string, opt *Options) (
 	}
 
 	if opt != nil && opt.HandshakeTimeout > 0 {
-		dialer.HandshakeTimeout = opt.HandshakeTimeout
+		if opt.HandshakeTimeout > 0 {
+			dialer.HandshakeTimeout = opt.HandshakeTimeout
+		}
+		if opt.ReadBufferSize > 0 {
+			dialer.ReadBufferSize = opt.ReadBufferSize
+		}
+		if opt.WriteBufferSize > 0 {
+			dialer.WriteBufferSize = opt.WriteBufferSize
+		}
 	}
 
 	var httpHeader http.Header = nil
