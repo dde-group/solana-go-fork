@@ -33,6 +33,21 @@ import (
 )
 
 type result interface{}
+type pingPayload struct {
+	JsonRpc string `json:"jsonrpc"`
+	Method  string `json:"method"`
+}
+
+var (
+	pingMsg []byte
+)
+
+func init() {
+	pingMsg, _ = json.Marshal(&pingPayload{
+		JsonRpc: "2.0",
+		Method:  "ping",
+	})
+}
 
 type Client struct {
 	rpcURL                  string
@@ -51,7 +66,7 @@ const (
 	// Time allowed to read the next pong message from the peer.
 	pongWait = 60 * time.Second
 	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
+	pingPeriod = 5 * time.Second
 )
 
 // Connect creates a new websocket client connecting to the provided endpoint.
@@ -99,7 +114,7 @@ func ConnectWithOptions(ctx context.Context, rpcEndpoint string, opt *Options) (
 	c.connCtx, c.connCtxCancel = context.WithCancel(context.Background())
 	go func() {
 		c.conn.SetReadDeadline(time.Now().Add(pongWait))
-		c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+		c.conn.SetPongHandler(func(string) error { c.sendPing(); return nil })
 		ticker := time.NewTicker(pingPeriod)
 		for {
 			select {
@@ -119,9 +134,11 @@ func (c *Client) sendPing() {
 	defer c.lock.Unlock()
 
 	c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-	if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-		return
-	}
+	c.conn.WriteMessage(websocket.TextMessage, pingMsg)
+	//if err := c.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+	//	return
+	//}
+
 }
 
 func (c *Client) Close() {
@@ -138,7 +155,7 @@ func (c *Client) receiveMessages() {
 			return
 		default:
 			_, message, err := c.conn.ReadMessage()
-			c.conn.SetReadDeadline(time.Now().Add(pongWait))
+			//c.conn.SetReadDeadline(time.Now().Add(pongWait))
 			if err != nil {
 				c.closeAllSubscription(err)
 				return
