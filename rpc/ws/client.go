@@ -20,6 +20,7 @@ package ws
 import (
 	"context"
 	"fmt"
+	"gitlab.xbit.trade/base/gutils/logutils"
 	"io"
 	"net/http"
 	"strconv"
@@ -255,12 +256,14 @@ func (c *Client) handleSubscriptionMessage(subID uint64, message []byte) {
 	}
 
 	// Decode the message using the subscription-provided decoderFunc.
+	now := time.Now()
 	result, err := sub.decoderFunc(message)
 	if err != nil {
 		fmt.Println("*****************************")
 		c.closeSubscription(sub.req.ID, fmt.Errorf("unable to decode client response: %w", err))
 		return
 	}
+	logutils.Info("decode msg", zap.Duration("d", time.Since(now)), zap.Int("len", len(message)))
 
 	// this cannot be blocking or else
 	// we  will no read any other message
