@@ -7,7 +7,6 @@ require (
 	github.com/gagliardetto/gofuzz v1.2.2
 	github.com/gagliardetto/treeout v0.1.4
 	github.com/google/uuid v1.6.0
-	gitlab.xbit.trade/base/gutils v1.0.4
 )
 
 require (
