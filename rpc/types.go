@@ -111,15 +111,15 @@ type TransactionWithMeta struct {
 	Version TransactionVersion `json:"version"`
 }
 
-func (dt TransactionWithMeta) GetParsedTransaction() (*ParsedTransaction, error) {
-	if dt.Transaction == nil {
+func (twm TransactionWithMeta) GetParsedTransaction() (*ParsedTransaction, error) {
+	if twm.Transaction == nil {
 		return nil, fmt.Errorf("transaction is nil")
 	}
-	if dt.Transaction.rawDataEncoding != solana.EncodingJSONParsed {
+	if twm.Transaction.rawDataEncoding != solana.EncodingJSONParsed {
 		return nil, fmt.Errorf("data is not in JSONParsed encoding")
 	}
 	var parsedTransaction ParsedTransaction
-	if err := json.Unmarshal(dt.Transaction.asJSON, &parsedTransaction); err != nil {
+	if err := json.Unmarshal(twm.Transaction.asJSON, &parsedTransaction); err != nil {
 		return nil, err
 	}
 	return &parsedTransaction, nil
@@ -296,6 +296,18 @@ type Account struct {
 
 	// The epoch at which this account will next owe rent
 	RentEpoch *big.Int `json:"rentEpoch"`
+}
+
+func (a *Account) GetJsonParsedToken() *ParsedAccountToken {
+	if a.Data == nil || len(a.Data.asJSON) == 0 {
+		return nil
+	}
+	var token ParsedAccountToken
+	err := json.Unmarshal(a.Data.asJSON, &token)
+	if err != nil {
+		return nil
+	}
+	return &token
 }
 
 type DataBytesOrJSON struct {
@@ -508,6 +520,26 @@ type ParsedInstruction struct {
 	Parsed    *InstructionInfoEnvelope `json:"parsed,omitempty"`
 	Data      solana.Base58            `json:"data,omitempty"`
 	Accounts  []solana.PublicKey       `json:"accounts,omitempty"`
+}
+
+type ParsedAccountToken struct {
+	Parsed struct {
+		Info struct {
+			IsNative    bool   `json:"isNative"`
+			Mint        string `json:"mint"`
+			Owner       string `json:"owner"`
+			State       string `json:"state"`
+			TokenAmount struct {
+				Amount         string  `json:"amount"`
+				Decimals       int     `json:"decimals"`
+				UiAmount       float64 `json:"uiAmount"`
+				UiAmountString string  `json:"uiAmountString"`
+			} `json:"tokenAmount"`
+		} `json:"info"`
+		Type string `json:"type"`
+	} `json:"parsed"`
+	Program string `json:"program"`
+	Space   int    `json:"space"`
 }
 
 type InstructionInfoEnvelope struct {
