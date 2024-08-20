@@ -525,16 +525,13 @@ type ParsedInstruction struct {
 type ParsedAccountToken struct {
 	Parsed struct {
 		Info struct {
-			IsNative    bool   `json:"isNative"`
-			Mint        string `json:"mint"`
-			Owner       string `json:"owner"`
-			State       string `json:"state"`
-			TokenAmount struct {
-				Amount         string  `json:"amount"`
-				Decimals       int     `json:"decimals"`
-				UiAmount       float64 `json:"uiAmount"`
-				UiAmountString string  `json:"uiAmountString"`
-			} `json:"tokenAmount"`
+			IsNative        bool           `json:"isNative"`
+			Mint            string         `json:"mint"`
+			Owner           string         `json:"owner"`
+			State           string         `json:"state"`
+			TokenAmount     *UiTokenAmount `json:"tokenAmount"`
+			Delegate        string         `json:"delegate"`
+			DelegatedAmount *UiTokenAmount `json:"delegatedAmount"`
 		} `json:"info"`
 		Type string `json:"type"`
 	} `json:"parsed"`
