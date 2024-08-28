@@ -54,7 +54,9 @@ type Create struct {
 
 // NewCreateInstructionBuilder creates a new `Create` instruction builder.
 func NewCreateInstructionBuilder() *Create {
-	nd := &Create{}
+	nd := &Create{
+		AccountMetaSlice: make(solana.AccountMetaSlice, 7),
+	}
 	return nd
 }
 
@@ -81,50 +83,46 @@ func (inst Create) Build() *Instruction {
 		inst.Mint,
 	)
 
-	keys := []*solana.AccountMeta{
-		{
-			PublicKey:  inst.Payer,
-			IsSigner:   true,
-			IsWritable: true,
-		},
-		{
-			PublicKey:  associatedTokenAddress,
-			IsSigner:   false,
-			IsWritable: true,
-		},
-		{
-			PublicKey:  inst.Wallet,
-			IsSigner:   false,
-			IsWritable: false,
-		},
-		{
-			PublicKey:  inst.Mint,
-			IsSigner:   false,
-			IsWritable: false,
-		},
-		{
-			PublicKey:  solana.SystemProgramID,
-			IsSigner:   false,
-			IsWritable: false,
-		},
-		{
-			PublicKey:  solana.TokenProgramID,
-			IsSigner:   false,
-			IsWritable: false,
-		},
-		{
-			PublicKey:  solana.SysVarRentPubkey,
-			IsSigner:   false,
-			IsWritable: false,
-		},
+	inst.AccountMetaSlice[0] = &solana.AccountMeta{
+		PublicKey:  inst.Payer,
+		IsSigner:   true,
+		IsWritable: true,
 	}
-
-	inst.AccountMetaSlice = keys
+	inst.AccountMetaSlice[1] = &solana.AccountMeta{
+		PublicKey:  associatedTokenAddress,
+		IsSigner:   false,
+		IsWritable: true,
+	}
+	inst.AccountMetaSlice[2] = &solana.AccountMeta{
+		PublicKey:  inst.Wallet,
+		IsSigner:   false,
+		IsWritable: false,
+	}
+	inst.AccountMetaSlice[3] = &solana.AccountMeta{
+		PublicKey:  inst.Mint,
+		IsSigner:   false,
+		IsWritable: false,
+	}
+	inst.AccountMetaSlice[4] = &solana.AccountMeta{
+		PublicKey:  solana.SystemProgramID,
+		IsSigner:   false,
+		IsWritable: false,
+	}
+	inst.AccountMetaSlice[6] = &solana.AccountMeta{
+		PublicKey:  solana.SysVarRentPubkey,
+		IsSigner:   false,
+		IsWritable: false,
+	}
 
 	return &Instruction{BaseVariant: bin.BaseVariant{
 		Impl:   inst,
 		TypeID: bin.NoTypeIDDefaultID,
 	}}
+}
+
+func (inst *Create) SetTokenProgram(programId solana.PublicKey) *Create {
+	inst.AccountMetaSlice[5] = solana.Meta(programId)
+	return inst
 }
 
 // ValidateAndBuild validates the instruction accounts.
@@ -194,9 +192,11 @@ func NewCreateInstruction(
 	payer solana.PublicKey,
 	walletAddress solana.PublicKey,
 	splTokenMintAddress solana.PublicKey,
+	tokenProgram solana.PublicKey,
 ) *Create {
 	return NewCreateInstructionBuilder().
 		SetPayer(payer).
 		SetWallet(walletAddress).
-		SetMint(splTokenMintAddress)
+		SetMint(splTokenMintAddress).
+		SetTokenProgram(tokenProgram)
 }
