@@ -81,6 +81,7 @@ func (inst Create) Build() *Instruction {
 	associatedTokenAddress, _, _ := solana.FindAssociatedTokenAddress(
 		inst.Wallet,
 		inst.Mint,
+		inst.AccountMetaSlice[5].PublicKey,
 	)
 
 	inst.AccountMetaSlice[0] = &solana.AccountMeta{
@@ -148,6 +149,7 @@ func (inst *Create) Validate() error {
 	_, _, err := solana.FindAssociatedTokenAddress(
 		inst.Wallet,
 		inst.Mint,
+		inst.AccountMetaSlice[5].PublicKey,
 	)
 	if err != nil {
 		return fmt.Errorf("error while FindAssociatedTokenAddress: %w", err)
