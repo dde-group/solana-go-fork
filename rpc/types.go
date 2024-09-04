@@ -20,6 +20,7 @@ package rpc
 import (
 	"encoding/base64"
 	stdjson "encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 
@@ -298,16 +299,34 @@ type Account struct {
 	RentEpoch *big.Int `json:"rentEpoch"`
 }
 
-func (a *Account) GetJsonParsedToken() *ParsedAccountToken {
-	if a.Data == nil || len(a.Data.asJSON) == 0 {
-		return nil
+func (a *Account) GetJsonParsedToken() (*ParsedAccountToken, error) {
+	jsonData := a.Data.GetRawJSON()
+	if nil == jsonData {
+		return nil, errors.New("json data nis empty")
 	}
 	var token ParsedAccountToken
 	err := json.Unmarshal(a.Data.asJSON, &token)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return &token
+	return &token, nil
+}
+
+func (a *Account) GetParsedMintAccount() (*ParsedMintAccount, error) {
+	jsonData := a.Data.GetRawJSON()
+	if nil == jsonData {
+		return nil, errors.New("json data nis empty")
+	}
+
+	var mint = ParsedMintAccount{}
+	err := json.Unmarshal(jsonData, &mint)
+	if err != nil {
+		return nil, err
+	}
+	if mint.Parsed.Type != "mint" {
+		return nil, fmt.Errorf("not a mint account, type: '%s'", mint.Parsed.Type)
+	}
+	return &mint, nil
 }
 
 type DataBytesOrJSON struct {
@@ -532,6 +551,26 @@ type ParsedAccountToken struct {
 			TokenAmount     *UiTokenAmount `json:"tokenAmount"`
 			Delegate        string         `json:"delegate"`
 			DelegatedAmount *UiTokenAmount `json:"delegatedAmount"`
+		} `json:"info"`
+		Type string `json:"type"`
+	} `json:"parsed"`
+	Program string `json:"program"`
+	Space   int    `json:"space"`
+}
+
+type ParseMintExtension struct {
+	Extension string             `json:"extension"`
+	State     stdjson.RawMessage `json:"state"`
+}
+type ParsedMintAccount struct {
+	Parsed struct {
+		Info struct {
+			Decimals        uint8                 `json:"decimals"`
+			Extensions      []*ParseMintExtension `json:"extensions"`
+			FreezeAuthority *solana.PublicKey     `json:"freezeAuthority"`
+			MintAuthority   *solana.PublicKey     `json:"mintAuthority"`
+			IsInitialized   bool                  `json:"isInitialized"`
+			Supply          string                `json:"supply"`
 		} `json:"info"`
 		Type string `json:"type"`
 	} `json:"parsed"`
